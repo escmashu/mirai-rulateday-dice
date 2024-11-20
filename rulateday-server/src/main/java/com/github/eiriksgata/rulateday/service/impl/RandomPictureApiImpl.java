@@ -1,10 +1,9 @@
 package com.github.eiriksgata.rulateday.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.github.eiriksgata.rulateday.dto.DiceMessageDTO;
 import com.github.eiriksgata.rulateday.event.EventUtils;
 import com.github.eiriksgata.trpg.dice.reply.CustomText;
-
+import com.github.eiriksgata.trpg.dice.vo.MessageData;
 import com.github.eiriksgata.rulateday.event.EventAdapter;
 import com.github.eiriksgata.rulateday.service.RandomPictureApiService;
 import com.github.eiriksgata.rulateday.utlis.RestUtil;
@@ -22,7 +21,7 @@ import java.util.Objects;
 public class RandomPictureApiImpl implements RandomPictureApiService {
 
     @Override
-    public String yinhuaAPI(DiceMessageDTO data) {
+    public String yinhuaAPI(MessageData<?> data) {
         String pictureAddress;
         try {
             String result = RestUtil.get("https://www.dmoe.cc/random.php?return=json");
@@ -89,7 +88,7 @@ public class RandomPictureApiImpl implements RandomPictureApiService {
 
 
     @Override
-    public String urlEncodeAPI(DiceMessageDTO data, String url) {
+    public String urlEncodeAPI(MessageData<?> data, String url) {
         URL pictureUrl;
         InputStream inputStream;
         try {

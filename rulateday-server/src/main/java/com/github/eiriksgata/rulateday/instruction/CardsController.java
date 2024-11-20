@@ -1,6 +1,5 @@
 package com.github.eiriksgata.rulateday.instruction;
 
-import com.github.eiriksgata.rulateday.dto.DiceMessageDTO;
 import com.github.eiriksgata.rulateday.event.EventUtils;
 import com.github.eiriksgata.rulateday.mapper.CardsGroupDataMapper;
 import com.github.eiriksgata.rulateday.pojo.CardsGroupData;
@@ -8,7 +7,7 @@ import com.github.eiriksgata.rulateday.pojo.CardsTypeList;
 import com.github.eiriksgata.trpg.dice.injection.InstructReflex;
 import com.github.eiriksgata.trpg.dice.injection.InstructService;
 import com.github.eiriksgata.trpg.dice.reply.CustomText;
-
+import com.github.eiriksgata.trpg.dice.vo.MessageData;
 import com.github.eiriksgata.rulateday.event.EventAdapter;
 import com.github.eiriksgata.rulateday.mapper.CardsTypeListMapper;
 import com.github.eiriksgata.rulateday.utlis.MyBatisUtil;
@@ -32,7 +31,7 @@ public class CardsController {
     public static CardsTypeListMapper cardsTypeListMapper = MyBatisUtil.getSqlSession().getMapper(CardsTypeListMapper.class);
 
     @InstructReflex(value = {"cards"})
-    public String cardsList(DiceMessageDTO data) {
+    public String cardsList(MessageData<?> data) {
         List<CardsTypeList> lists = cardsTypeListMapper.selectAll();
         if (lists.size() == 0) {
             return CustomText.getText("cards.type.not.found");
@@ -48,14 +47,14 @@ public class CardsController {
     }
 
     @InstructReflex(value = {"cardsAdd", "cardsadd"}, priority = 3)
-    public String cardsAdd(DiceMessageDTO data) {
-        String[] parsingData = data.getBody().split(" ");
+    public String cardsAdd(MessageData<?> data) {
+        String[] parsingData = data.getMessage().split(" ");
         if (parsingData.length < 2) {
             return CustomText.getText("cards.add.parameter.format.error");
         }
         CardsTypeList cardsTypeList = new CardsTypeList();
         cardsTypeList.setName(parsingData[0]);
-        cardsTypeList.setContent(data.getBody().substring(parsingData[0].length() + 1));
+        cardsTypeList.setContent(data.getMessage().substring(parsingData[0].length() + 1));
         try {
             cardsTypeListMapper.insert(cardsTypeList);
             MyBatisUtil.getSqlSession().commit();
@@ -66,19 +65,19 @@ public class CardsController {
     }
 
     @InstructReflex(value = {"cardsDel", "cardsdel"}, priority = 3)
-    public String cardsDel(DiceMessageDTO data) {
-        cardsTypeListMapper.deleteByName(data.getBody());
+    public String cardsDel(MessageData<?> data) {
+        cardsTypeListMapper.deleteByName(data.getMessage());
         MyBatisUtil.getSqlSession().commit();
         return CustomText.getText("cards.delete.success");
     }
 
 
     @InstructReflex(value = {"drawAdd", "drawadd"}, priority = 3)
-    public String drawAdd(DiceMessageDTO data) {
-        if (data.getBody().equals("") || data.getBody() == null) {
+    public String drawAdd(MessageData<?> data) {
+        if (data.getMessage().equals("") || data.getMessage() == null) {
             return CustomText.getText("cards.draw.not.parameter");
         }
-        CardsTypeList cardsTypeList = cardsTypeListMapper.selectByName(data.getBody());
+        CardsTypeList cardsTypeList = cardsTypeListMapper.selectByName(data.getMessage());
         if (cardsTypeList == null) {
             return CustomText.getText("cards.draw.not.found");
         }
@@ -112,7 +111,7 @@ public class CardsController {
     }
 
     @InstructReflex(value = {"drawList", "drawlist"}, priority = 3)
-    public String drawList(DiceMessageDTO data) {
+    public String drawList(MessageData<?> data) {
         final Long[] groupId = new Long[1];
         EventUtils.eventCallback(data.getEvent(), new EventAdapter() {
             @Override
@@ -145,7 +144,7 @@ public class CardsController {
 
 
     @InstructReflex(value = {"drawHide", "drawhide"}, priority = 3)
-    public String drawHideOut(DiceMessageDTO data) {
+    public String drawHideOut(MessageData<?> data) {
         final long[] groupId = new long[1];
         EventUtils.eventCallback(data.getEvent(), new EventAdapter() {
             @Override
@@ -189,7 +188,7 @@ public class CardsController {
     }
 
     @InstructReflex(value = {"draw"}, priority = 2)
-    public String drawOut(DiceMessageDTO data) {
+    public String drawOut(MessageData<?> data) {
         final long[] groupId = new long[1];
         EventUtils.eventCallback(data.getEvent(), new EventAdapter() {
             @Override
@@ -217,7 +216,7 @@ public class CardsController {
     }
 
     @InstructReflex(value = {"drawclear", "drawClear"}, priority = 3)
-    public String drawClear(DiceMessageDTO data) {
+    public String drawClear(MessageData<?> data) {
         EventUtils.eventCallback(data.getEvent(), new EventAdapter() {
             @Override
             public void group(GroupMessageEvent event) {

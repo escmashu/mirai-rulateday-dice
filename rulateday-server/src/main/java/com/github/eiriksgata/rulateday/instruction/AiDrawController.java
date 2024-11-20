@@ -1,12 +1,11 @@
 package com.github.eiriksgata.rulateday.instruction;
 
 import com.alibaba.fastjson.JSONObject;
-import com.github.eiriksgata.rulateday.dto.DiceMessageDTO;
-import com.github.eiriksgata.rulateday.dto.DiceResponse;
 import com.github.eiriksgata.rulateday.event.EventUtils;
 import com.github.eiriksgata.trpg.dice.injection.InstructReflex;
 import com.github.eiriksgata.trpg.dice.injection.InstructService;
 import com.github.eiriksgata.trpg.dice.reply.CustomText;
+import com.github.eiriksgata.trpg.dice.vo.MessageData;
 import com.github.eiriksgata.rulateday.event.EventAdapter;
 import com.github.eiriksgata.rulateday.service.OtherApiService;
 import com.github.eiriksgata.rulateday.vo.AiTextDrawVo;
@@ -21,15 +20,15 @@ import org.mindrot.jbcrypt.BCrypt;
 public class AiDrawController {
 
     @InstructReflex(value = {"ai-text-draw"}, priority = 3)
-    public DiceResponse textDrawImage(DiceMessageDTO data) {
-        AiTextDrawVo aiTextDrawVo = JSONObject.parseObject(data.getBody(), AiTextDrawVo.class);
+    public String textDrawImage(MessageData<?> data) {
+        AiTextDrawVo aiTextDrawVo = JSONObject.parseObject(data.getMessage(), AiTextDrawVo.class);
 
         if (aiTextDrawVo.getPrompt() == null || aiTextDrawVo.getPrompt().equals("")) {
-            return DiceResponse.body(CustomText.getText("ai.text.draw.prompt.null"));
+            return CustomText.getText("ai.text.draw.prompt.null");
         }
 
         if (!WebSocketClientInit.webSocketClient.isOpen()) {
-            return DiceResponse.body(CustomText.getText("net.ws.link.fail"));
+            return CustomText.getText("net.ws.link.fail");
         }
 
         EventUtils.eventCallback(data.getEvent(), new EventAdapter() {
@@ -60,7 +59,7 @@ public class AiDrawController {
             }
         });
 
-        return DiceResponse.body(CustomText.getText("ai.text.draw.task.success"));
+        return CustomText.getText("ai.text.draw.task.success");
     }
 
 }

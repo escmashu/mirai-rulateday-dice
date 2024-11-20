@@ -66,17 +66,21 @@ public class UserInitiativeServerImpl {
         if (initiativeDataList.size() == 0) {
             return CustomText.getText("initiative.null");
         }
+        if (initiativeDataList.size() == 1) {
+            return CustomText.getText(
+                    "initiative.show",
+                    initiativeDataList.get(0).getName() +
+                            "[" + initiativeDataList.get(0).getValue() + "]");
+        }
         initiativeSort(initiativeDataList);
         StringBuilder resultText = new StringBuilder();
-        for (int i = 0; i < initiativeDataList.size(); i++) {
-            resultText
-                    .append("\n")
-                    .append(i + 1 + ". ")
+        resultText.append(initiativeDataList.get(0).getName()).append("[").append(initiativeDataList.get(0).getValue()).append("]");
+        for (int i = 1; i < initiativeDataList.size(); i++) {
+            resultText.append(">")
                     .append(initiativeDataList.get(i).getName())
                     .append("[")
                     .append(initiativeDataList.get(i).getValue())
                     .append("]");
-
         }
         return CustomText.getText("initiative.show", resultText.toString());
     }

@@ -1,10 +1,9 @@
 package com.github.eiriksgata.rulateday.service;
 
-
-import com.github.eiriksgata.rulateday.dto.DiceMessageDTO;
+import com.github.eiriksgata.trpg.dice.vo.MessageData;
 
 public interface RandomPictureApiService {
-    String yinhuaAPI(DiceMessageDTO data);
+    String yinhuaAPI(MessageData<?> data);
 
-    String urlEncodeAPI(DiceMessageDTO data, String url);
+    String urlEncodeAPI(MessageData<?> data, String url);
 }

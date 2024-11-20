@@ -2,12 +2,11 @@ package com.github.eiriksgata.rulateday.instruction;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.github.eiriksgata.rulateday.dto.DiceMessageDTO;
 import com.github.eiriksgata.rulateday.pojo.QueryDataBase;
 import com.github.eiriksgata.trpg.dice.injection.InstructReflex;
 import com.github.eiriksgata.trpg.dice.injection.InstructService;
 import com.github.eiriksgata.trpg.dice.reply.CustomText;
-
+import com.github.eiriksgata.trpg.dice.vo.MessageData;
 import com.github.eiriksgata.rulateday.service.DiceConfigService;
 import com.github.eiriksgata.rulateday.service.UserConversationService;
 import com.github.eiriksgata.rulateday.service.impl.UserConversationImpl;
@@ -28,21 +27,21 @@ public class InfiniteLibController {
 
 
     @InstructReflex(value = {"ir2"})
-    public String infiniteLibOnlineQuery(DiceMessageDTO data) {
+    public String infiniteLibOnlineQuery(MessageData<?> data) {
         if (!DiceConfigService.diceConfigMapper.selectById().getBeta_version()) {
             return CustomText.getText("infinite.lib.ir2.no.enable");
         }
 
         //如果输入的数据是无关键字的
-        if (data.getBody().equals("")) {
+        if (data.getMessage().equals("")) {
             return CustomText.getText("dr5e.rule.not.parameter");
         }
-        if (data.getBody().equals(" ")) {
+        if (data.getMessage().equals(" ")) {
             return CustomText.getText("dr5e.rule.not.parameter");
         }
         String url = apiUrl + "/openapi/v1/infinite/lib/query/name";
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("name", data.getBody());
+        jsonObject.put("name", data.getMessage());
         ResponseBaseVo<List<QueryDataBase>> result =
                 JSONObject.parseObject(
                         RestUtil.postForJson(
@@ -67,7 +66,7 @@ public class InfiniteLibController {
                     count++;
                 }
                 //将记录暂时存入数据库
-                conversationService.saveConversation(data.getId(), saveData);
+                conversationService.saveConversation(data.getQqID(), saveData);
                 return text.toString();
 
             } else {

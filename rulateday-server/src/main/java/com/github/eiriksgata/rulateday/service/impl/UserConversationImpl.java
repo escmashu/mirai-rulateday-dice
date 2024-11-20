@@ -2,11 +2,10 @@ package com.github.eiriksgata.rulateday.service.impl;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
-import com.github.eiriksgata.rulateday.dto.DiceMessageDTO;
 import com.github.eiriksgata.rulateday.mapper.UserConversationMapper;
 import com.github.eiriksgata.rulateday.pojo.QueryDataBase;
 import com.github.eiriksgata.rulateday.pojo.UserConversation;
-
+import com.github.eiriksgata.trpg.dice.vo.MessageData;
 import com.github.eiriksgata.rulateday.instruction.QueryController;
 import com.github.eiriksgata.rulateday.service.UserConversationService;
 import com.github.eiriksgata.rulateday.utlis.MyBatisUtil;
@@ -48,27 +47,27 @@ public class UserConversationImpl implements UserConversationService {
     }
 
 
-    public static String checkInputQuery(DiceMessageDTO data) {
+    public static String checkInputQuery(MessageData<?> data) {
         //检测用户是否有对话模式记录
-        UserConversation result = mapper.selectById(data.getId());
+        UserConversation result = mapper.selectById(data.getQqID());
         if (result == null) {
             return null;
         }
         if (System.currentTimeMillis() - result.getTimestamp() > 1000 * 2 * 60) {
-            mapper.deleteById(data.getId());
+            mapper.deleteById(data.getQqID());
             MyBatisUtil.getSqlSession().commit();
             return null;
         }
 
         try {
-            int number = Integer.parseInt(data.getBody());
+            int number = Integer.parseInt(data.getMessage());
             List<QueryDataBase> queryData = JSONObject.parseObject(result.getData(), new TypeReference<List<QueryDataBase>>() {
             }.getType());
 
             if (number >= queryData.size() || number < 0) {
                 return "输入的数字需要在0-" + queryData.size() + "范围内";
             }
-            mapper.deleteById(data.getId());
+            mapper.deleteById(data.getQqID());
             MyBatisUtil.getSqlSession().commit();
             if (queryData.get(number).getName().length() > 5) {
                 if (queryData.get(number).getName().startsWith("怪物图鉴:")) {
@@ -77,7 +76,7 @@ public class UserConversationImpl implements UserConversationService {
             }
             return queryData.get(number).getDescribe();
         } catch (Exception e) {
-            mapper.deleteById(data.getId());
+            mapper.deleteById(data.getQqID());
             MyBatisUtil.getSqlSession().commit();
             return "输入的数字不符合要求，已取消对话模式";
         }
