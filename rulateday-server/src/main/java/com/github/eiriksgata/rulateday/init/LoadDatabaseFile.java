@@ -3,7 +3,6 @@ package com.github.eiriksgata.rulateday.init;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.eiriksgata.rulateday.config.GlobalData;
-import com.github.eiriksgata.trpg.dice.reply.CustomText;
 import com.github.eiriksgata.trpg.dice.utlis.VersionUtils;
 import com.github.eiriksgata.rulateday.RulatedayCore;
 import com.github.eiriksgata.rulateday.config.CustomDocumentHandler;
@@ -37,9 +36,6 @@ public class LoadDatabaseFile {
         }
         try {
             //初始化载入数据顺序，考虑到一些方法或者数据需要重复构建，因此应当优化一下结构。
-
-            //自定义回复路径配置
-            initConfigCustomTextTool();
 
             //检查创建项目文件夹
             createProjectFile();
@@ -78,10 +74,6 @@ public class LoadDatabaseFile {
         if (!mkdir.exists()) {
             mkdir.mkdirs();
         }
-    }
-
-    public static void initConfigCustomTextTool() {
-        CustomText.setCustomTextFilePath("config/com.github.eiriksgata.rulateday-dice/custom-text.json");
     }
 
 
