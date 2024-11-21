@@ -17,7 +17,8 @@ import net.mamoe.mirai.event.events.GroupTempMessageEvent;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-
+import java.util.Arrays;
+import java.util.ArrayList;
 /**
  * author: create by Keith
  * version: v1.0
@@ -32,6 +33,7 @@ public class CardsController {
 
     @InstructReflex(value = {"cards"})
     public String cardsList(MessageData<?> data) {
+        //cardsGroupDataMapper.newtest();
         List<CardsTypeList> lists = cardsTypeListMapper.selectAll();
         if (lists.size() == 0) {
             return CustomText.getText("cards.type.not.found");
@@ -104,6 +106,7 @@ public class CardsController {
             cardsGroupData.setTypeId(cardsTypeList.getId());
             cardsGroupData.setGroupId(groupId[0]);
             cardsGroupData.setValue(anAddDataArr);
+            cardsGroupData.setAutoShuffle(false);
             cardsGroupDataMapper.insert(cardsGroupData);
         }
         MyBatisUtil.getSqlSession().commit();
@@ -135,7 +138,7 @@ public class CardsController {
         }
         StringBuilder result = new StringBuilder();
 
-        result.append(CustomText.getText("cards.draw.list")).append("[");
+        result.append(CustomText.getText("cards.draw.list")).append("(" + String.valueOf(list.size()) + ")").append(" - [");
         list.forEach(cardsGroupData -> result.append(cardsGroupData.getValue()).append(","));
         result.delete(result.length() - 1, result.length());
         result.append("]");
@@ -144,7 +147,7 @@ public class CardsController {
 
     @InstructReflex(value = {"drawHide", "drawhide"}, priority = 3)
     public String drawHideOut(MessageData<?> data) {
-        final long[] groupId = new long[1];
+        final Long[] groupId = new Long[1];
         EventUtils.eventCallback(data.getEvent(), new EventAdapter() {
             @Override
             public void group(GroupMessageEvent event) {
@@ -186,7 +189,7 @@ public class CardsController {
         return CustomText.getText("cards.draw.hide.success");
     }
 
-    @InstructReflex(value = {"draw", "draw"}, priority = 2)
+    @InstructReflex(value = {"draw"}, priority = 2)
     public String drawOut(MessageData<?> data) {
         int countNumber = 1;
         if (data.getMessage().equals("") || data.getMessage() == null) {
@@ -207,8 +210,7 @@ public class CardsController {
                 return CustomText.getText("dice.en.parameter.format.error");
             }
         }
-        CardsTypeList cardsTypeList = cardsTypeListMapper.selectByName(data.getMessage());
-        final long[] groupId = new long[1];
+        final Long[] groupId = new Long[1];
         EventUtils.eventCallback(data.getEvent(), new EventAdapter() {
             @Override
             public void group(GroupMessageEvent event) {
@@ -225,6 +227,38 @@ public class CardsController {
                 groupId[0] = event.getGroup().getId();
             }
         });
+
+        List<CardsGroupData> list = cardsGroupDataMapper.getGroupCardsList(groupId[0]);//获取剩余卡组
+        int listSize = list.size();//剩余卡组数量
+        CardsGroupData resultHelper = cardsGroupDataMapper.randomGetCard(groupId[0]);
+        Boolean needAutoShuffle = cardsGroupDataMapper.GetGeoupCardAutoShuffle(groupId[0]);
+        if(needAutoShuffle == null)
+        {
+            needAutoShuffle = false;
+        }
+        int arrayLength = 0;
+        List<String> addDataList = new ArrayList<>();
+        Long cardListTypeId = 0L;
+        if(listSize > 0)
+        {
+            CardsTypeList cardsTypeList = cardsTypeListMapper.selectById(cardsGroupDataMapper.GetGeoupCardTypeId(groupId[0]));
+            String[] addDataArr = cardsTypeList.getContent().split(",");//获取目标完整卡组
+            arrayLength = addDataArr.length;//目标完整卡组数量
+            addDataList = Arrays.asList(addDataArr);
+            cardListTypeId = cardsTypeList.getId();
+        }
+        String[] currentValueList = new String[arrayLength];
+        if(needAutoShuffle)
+        {
+            if(listSize <= countNumber && arrayLength > countNumber)
+            {
+                for(int i = 0; i < list.size(); i = i + 1)
+                {
+                    currentValueList[i] = list.get(i).getValue();//记录剩余卡组的所有Value
+                }
+            }
+
+        }
         String resultList = "";
         for(int i = 0; i < countNumber; i = i + 1)
         {
@@ -234,11 +268,8 @@ public class CardsController {
                 {
                     return CustomText.getText("cards.draw.not.data");
                 }
-                else
-                {
-                    return CustomText.getText("cards.draw.success", resultList);
-                }
             }
+
             if(resultList == "")
             {
                 resultList = result.getValue();
@@ -249,6 +280,29 @@ public class CardsController {
             }
             cardsGroupDataMapper.deleteById(result.getId());
             MyBatisUtil.getSqlSession().commit();
+
+            CardsGroupData nextResult = cardsGroupDataMapper.randomGetCard(groupId[0]);
+            if (nextResult == null) {
+                if(needAutoShuffle)
+                {
+                    if(listSize > 0)
+                    {
+                        for (int j = 0; j < addDataList.size(); j = j + 1) {//将剩余此次未被抽到的卡洗牌
+                            String anAddDataArr = addDataList.get(j);
+                            Boolean arrContains = Arrays.asList(currentValueList).contains(anAddDataArr);
+                            if(!arrContains)
+                            {
+                                CardsGroupData cardsGroupDataTemp = new CardsGroupData();
+                                cardsGroupDataTemp.setTypeId(cardListTypeId);
+                                cardsGroupDataTemp.setGroupId(groupId[0]);
+                                cardsGroupDataTemp.setValue(anAddDataArr);
+                                cardsGroupDataTemp.setAutoShuffle(true);
+                                cardsGroupDataMapper.insert(cardsGroupDataTemp);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         return CustomText.getText("cards.draw.success", resultList);
@@ -276,6 +330,78 @@ public class CardsController {
             }
         });
         return CustomText.getText("cards.draw.clear");
+    }
+
+    @InstructReflex(value = {"drawreload", "drawReload"}, priority = 3)
+    public String drawClear(MessageData<?> data) {
+        EventUtils.eventCallback(data.getEvent(), new EventAdapter() {
+            @Override
+            public void group(GroupMessageEvent event) {
+                cardsGroupDataMapper.clearByGroupId(event.getGroup().getId());
+                MyBatisUtil.getSqlSession().commit();
+            }
+
+            @Override
+            public void friend(FriendMessageEvent event) {
+                cardsGroupDataMapper.clearByGroupId(-event.getFriend().getId());
+                MyBatisUtil.getSqlSession().commit();
+            }
+
+            @Override
+            public void groupTemp(GroupTempMessageEvent event) {
+                cardsGroupDataMapper.clearByGroupId(event.getGroup().getId());
+                MyBatisUtil.getSqlSession().commit();
+            }
+        });
+        return CustomText.getText("cards.draw.clear");
+    }
+
+    @InstructReflex(value = {"drawautoon", "drawAutoOn"}, priority = 3)
+    public String drawAutoOn(MessageData<?> data) {
+        EventUtils.eventCallback(data.getEvent(), new EventAdapter() {
+            @Override
+            public void group(GroupMessageEvent event) {
+                cardsGroupDataMapper.updateGroupCardsListAutoShuffle(event.getGroup().getId(), true);
+                MyBatisUtil.getSqlSession().commit();
+            }
+
+            @Override
+            public void friend(FriendMessageEvent event) {
+                cardsGroupDataMapper.updateGroupCardsListAutoShuffle(-event.getFriend().getId(), true);
+                MyBatisUtil.getSqlSession().commit();
+            }
+
+            @Override
+            public void groupTemp(GroupTempMessageEvent event) {
+                cardsGroupDataMapper.updateGroupCardsListAutoShuffle(event.getGroup().getId(), true);
+                MyBatisUtil.getSqlSession().commit();
+            }
+        });
+        return CustomText.getText("cards.draw.auto.on");
+    }
+
+    @InstructReflex(value = {"drawautooff", "drawAutoOff"}, priority = 3)
+    public String drawAutoOff(MessageData<?> data) {
+        EventUtils.eventCallback(data.getEvent(), new EventAdapter() {
+            @Override
+            public void group(GroupMessageEvent event) {
+                cardsGroupDataMapper.updateGroupCardsListAutoShuffle(event.getGroup().getId(), false);
+                MyBatisUtil.getSqlSession().commit();
+            }
+
+            @Override
+            public void friend(FriendMessageEvent event) {
+                cardsGroupDataMapper.updateGroupCardsListAutoShuffle(-event.getFriend().getId(), false);
+                MyBatisUtil.getSqlSession().commit();
+            }
+
+            @Override
+            public void groupTemp(GroupTempMessageEvent event) {
+                cardsGroupDataMapper.updateGroupCardsListAutoShuffle(event.getGroup().getId(), false);
+                MyBatisUtil.getSqlSession().commit();
+            }
+        });
+        return CustomText.getText("cards.draw.auto.off");
     }
 
 

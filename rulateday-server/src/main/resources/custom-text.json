@@ -64,6 +64,8 @@
   "cards.draw.hide.success": "抽出结果已私发。",
   "cards.draw.success": "抽取结果：{0}",
   "cards.draw.clear": "已清空当前牌堆所有数据。",
+  "cards.draw.auto.on": "当前牌堆已切换为自动洗牌，当牌组抽光时，会自动将弃牌堆切洗为新的卡组。",
+  "cards.draw.auto.off": "当前牌堆已取消自动洗牌。",
   "initiative.delete.oneself": "已删除你的先攻骰",
   "initiative.delete.other": "已删除{0}的先攻骰",
   "initiative.clear": "已清空当前的先攻池",

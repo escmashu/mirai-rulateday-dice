@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Main-Class: 
+Class-Path: sqlite-jdbc-3.41.2.2.jar fastjson2-2.0.32.jar kotlinx-corout
+ ines-jdk8-1.6.4.jar slf4j-api-2.0.5.jar annotations-19.0.0.jar javassis
+ t-3.28.0-GA.jar http-request-6.0.jar trpg-java-dice-1.4.1.jar fastjson2
+ -extension-2.0.32.jar kotlinx-serialization-core-jvm-1.5.0.jar netty-re
+ solver-4.1.63.Final.jar kotlinx-serialization-json-jvm-1.5.0.jar mirai-
+ core-utils-jvm-2.15.0.jar netty-codec-4.1.63.Final.jar mirai-core-jvm-2
+ .15.0.jar Java-WebSocket-1.5.3.jar kotlin-jvm-blocking-bridge-runtime-j
+ vm-3.0.0-180.1.jar kotlin-reflect-1.8.10.jar kotlin-stdlib-common-1.8.1
+ 0.jar netty-common-4.1.63.Final.jar mirai-core-api-jvm-2.15.0.jar bcpro
+ v-jdk15on-1.64.jar netty-handler-4.1.63.Final.jar netty-buffer-4.1.63.F
+ inal.jar kotlin-stdlib-1.8.10.jar commons-lang3-3.12.0.jar fastjson-2.0
+ .32.jar kotlinx-coroutines-core-jvm-1.6.4.jar kotlinx-serialization-pro
+ tobuf-jvm-1.5.0.jar Calci-kernel-java-1.1.jar jsr305-3.0.2.jar log4j-ap
+ i-2.19.0.jar netty-transport-4.1.63.Final.jar mirai-console-compiler-an
+ notations-jvm-2.15.0.jar atomicfu-jvm-0.20.0.jar reflections-0.10.2.jar
+  kotlin-stdlib-jdk7-1.8.10.jar jbcrypt-0.4.jar kotlin-stdlib-jdk8-1.8.1
+ 0.jar mybatis-3.5.13.jar kotlin-dynamic-delegation-jvm-0.4.0-180.1.jar 
+ javax.annotation-api-1.3.2.jar
+
