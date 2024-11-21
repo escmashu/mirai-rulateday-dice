@@ -142,7 +142,6 @@ public class CardsController {
         return result.toString();
     }
 
-
     @InstructReflex(value = {"drawHide", "drawhide"}, priority = 3)
     public String drawHideOut(MessageData<?> data) {
         final long[] groupId = new long[1];
@@ -187,8 +186,28 @@ public class CardsController {
         return CustomText.getText("cards.draw.hide.success");
     }
 
-    @InstructReflex(value = {"draw"}, priority = 2)
+    @InstructReflex(value = {"draw", "draw"}, priority = 2)
     public String drawOut(MessageData<?> data) {
+        int countNumber = 1;
+        if (data.getMessage().equals("") || data.getMessage() == null) {
+            countNumber = 1;
+        }
+        else
+        {
+            String MessageContent = data.getMessage().trim();
+            if(MessageContent != null && MessageContent.matches("-?\\d+(\\.\\d+)?"))
+            {
+                if(Integer.parseInt(MessageContent) > 0)
+                {
+                    countNumber = Integer.parseInt(MessageContent);
+                }
+            }
+            else
+            {
+                return CustomText.getText("dice.en.parameter.format.error");
+            }
+        }
+        CardsTypeList cardsTypeList = cardsTypeListMapper.selectByName(data.getMessage());
         final long[] groupId = new long[1];
         EventUtils.eventCallback(data.getEvent(), new EventAdapter() {
             @Override
@@ -206,13 +225,33 @@ public class CardsController {
                 groupId[0] = event.getGroup().getId();
             }
         });
-        CardsGroupData result = cardsGroupDataMapper.randomGetCard(groupId[0]);
-        if (result == null) {
-            return CustomText.getText("cards.draw.not.data");
+        String resultList = "";
+        for(int i = 0; i < countNumber; i = i + 1)
+        {
+            CardsGroupData result = cardsGroupDataMapper.randomGetCard(groupId[0]);
+            if (result == null) {
+                if(resultList=="")
+                {
+                    return CustomText.getText("cards.draw.not.data");
+                }
+                else
+                {
+                    return CustomText.getText("cards.draw.success", resultList);
+                }
+            }
+            if(resultList == "")
+            {
+                resultList = result.getValue();
+            }
+            else
+            {
+                resultList = result.getValue() + " | " + resultList;
+            }
+            cardsGroupDataMapper.deleteById(result.getId());
+            MyBatisUtil.getSqlSession().commit();
         }
-        cardsGroupDataMapper.deleteById(result.getId());
-        MyBatisUtil.getSqlSession().commit();
-        return CustomText.getText("cards.draw.success", result.getValue());
+
+        return CustomText.getText("cards.draw.success", resultList);
     }
 
     @InstructReflex(value = {"drawclear", "drawClear"}, priority = 3)
