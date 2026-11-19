@@ -333,7 +333,7 @@ public class CardsController {
     }
 
     @InstructReflex(value = {"drawreload", "drawReload"}, priority = 3)
-    public String drawClear(MessageData<?> data) {
+    public String drawReload(MessageData<?> data) {
         EventUtils.eventCallback(data.getEvent(), new EventAdapter() {
             @Override
             public void group(GroupMessageEvent event) {
